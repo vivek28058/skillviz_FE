@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50;
+  }
+}
+
+.apexcharts-xaxis-label {
+  cursor: pointer;
+}
+
+.react-datepicker__year-wrapper {
+  font-size: 1rem;
+}
+
+.react-datepicker__header.react-datepicker-year-header {
+  color: white;
+  background-color: #29295f;
+}
+
+.react-datepicker__year-text--selected {
+  background-color: #f16729 !important;
+}

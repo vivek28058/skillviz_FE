@@ -1,0 +1,74 @@
+# This workflow will create a .env file with the secrets, does a clean installation of node dependencies, cache/restore them, build the source code and deploy to the IGS remote server
+
+name: SkillViz CI
+
+on:
+  push:
+    branches: [ "develop" ]
+    
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Bun runtime
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Create .env file
+        uses: ozaytsev86/create-env-file@v1
+        with:
+          ENV_VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
+          ENV_VITE_AUTH_API_ENDPOINT: ${{ secrets.VITE_AUTH_API_ENDPOINT }}
+          ENV_VITE_LOGIN_API: ${{ secrets.VITE_LOGIN_API }}
+          ENV_VITE_ADMIN_API_ENDPOINT: ${{ secrets.VITE_ADMIN_API_ENDPOINT }}
+          ENV_VITE_ADMIN_SEARCH_API: ${{ secrets.VITE_ADMIN_SEARCH_API }}
+          ENV_VITE_ADMIN_SIMPLE_SEARCH_API: ${{ secrets.VITE_ADMIN_SIMPLE_SEARCH_API }}
+          ENV_VITE_ADMIN_HIERARCHY_API: ${{ secrets.VITE_ADMIN_HIERARCHY_API }}
+          ENV_VITE_ADMIN_HIERARCHY_COUNT_API: ${{ secrets.VITE_ADMIN_HIERARCHY_COUNT_API }}
+          ENV_VITE_ADMIN_ANALYTICS_API: ${{ secrets.VITE_ADMIN_ANALYTICS_API }}
+          ENV_VITE_ADMIN_USERS_API: ${{ secrets.VITE_ADMIN_USERS_API }}
+          ENV_VITE_ADMIN_USER_ROLE: ${{ secrets.VITE_ADMIN_USER_ROLE }}
+          ENV_VITE_ADMIN_USER_STATUS: ${{ secrets.VITE_ADMIN_USER_STATUS }}
+          ENV_VITE_ADMIN_ADD_USER: ${{ secrets.VITE_ADMIN_ADD_USER }}
+          ENV_VITE_ADMIN_RESET_USER_PASSWORD: ${{ secrets.VITE_ADMIN_RESET_USER_PASSWORD }}
+          ENV_VITE_USER_API_ENDPOINT: ${{ secrets.VITE_USER_API_ENDPOINT }}
+          ENV_VITE_USERS_SET_PASSWORD: ${{ secrets.VITE_USERS_SET_PASSWORD }}
+          ENV_VITE_USERS_EXPERIENCE_API: ${{ secrets.VITE_USERS_EXPERIENCE_API }}
+          ENV_VITE_USERS_EDUCATION_API: ${{ secrets.VITE_USERS_EDUCATION_API }}
+          ENV_VITE_USERS_CERTIFICATES_API: ${{ secrets.VITE_USERS_CERTIFICATES_API }}
+          ENV_VITE_USERS_HIERARCHY_API: ${{ secrets.VITE_USERS_HIERARCHY_API }}
+          ENV_VITE_USERS_ANALYTICS_API: ${{ secrets.VITE_USERS_ANALYTICS_API }}
+
+      - name: Install dependencies and build app
+        run: |
+          bun i
+          bun run build
+
+      - name: Copy build files via ssh password
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: dist/*
+          target: /home/${{ secrets.SSH_USERNAME }}/
+
+      - name: Deploy app to remote server using SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            echo "Connected to remote server"
+            cd /var/www/html
+            echo ${{ secrets.SSH_PASSWORD }} | sudo -S rm -rf *
+            mv /home/${{ secrets.SSH_USERNAME }}/dist/* .
+            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl restart nginx.service
