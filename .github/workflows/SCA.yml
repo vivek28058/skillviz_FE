@@ -46,7 +46,7 @@ jobs:
 
       - name: Run ZAP Scan
         run: |
-          docker run -v $(pwd):/zap/wrk:rw -t owasp/zap2docker-stable zap-full-scan.py -t https://igsglobal.com/
+          docker run -v $(pwd):/zap/wrk:rw -t zaproxy/zap-stable zap-full-scan.py -t https://igsglobal.com/
         env:
           ZAP_URL: https://igsglobal.com/  # Replace this with the actual URL of your app
 
