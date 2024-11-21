@@ -1,4 +1,4 @@
-name: Build
+name: Sonar and Snyk scan
 on:
   push:
     branches:
@@ -11,7 +11,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
       - name: SonarQube Cloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Install Snyk
+        run: npm install -g snyk
+
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run Snyk SCA Scan
+        run: snyk test --all-projects
+        continue-on-error: true
+
+      - name: Monitor Snyk SCA Scan
+        run: snyk monitor --all-projects
+        continue-on-error: true
