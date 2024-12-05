@@ -21,6 +21,32 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+      - name: Generate SonarQube JSON Report
+        run: |
+          curl -u ${{ secrets.SONAR_TOKEN }}: \
+            "https://sonarcloud.io/api/measures/component_tree?component=vivek28058_Skillviz_BE&metricKeys=ncloc,complexity,violations,bugs,vulnerabilities,code_smells" \
+            -o sonar_report.json
+        shell: bash
+
+      #- name: SonarQube Quality Gate check
+      #  id: sonarqube-quality-gate-check
+      #  uses: sonarsource/sonarqube-quality-gate-action@master
+      #  timeout-minutes: 5
+      #  env:
+      #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Upload SonarQube Report
+        uses: actions/upload-artifact@v3
+        with:
+           name: sonar-report
+           path: sonar_report.json
+
+      - name: Build Docker Image
+        run: |
+          docker build -t myapp:latest .
+        env:
+          DOCKER_BUILDKIT: 1
+
       - name: Install Snyk
         run: npm install -g snyk
 
@@ -29,12 +55,63 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Run Snyk SCA Scan
-        run: snyk test --all-projects
-        continue-on-error: true
+      - name: Run Snyk Dependencies Scan
+        id: snyk-scan
+        run: |
+          snyk test --all-projects --json > snyk_report.json || true
+        shell: bash
+
+      - name: Debug Snyk JSON Output
+        run: |
+          echo "Printing snyk_report.json:"
+          cat snyk_report.json
+          echo "Formatted output using jq:"
+          jq '.' snyk_report.json
+        shell: bash
 
       - name: Monitor Snyk SCA Scan
         run: snyk monitor --all-projects
         continue-on-error: true
 
+      - name: Check for Medium, High, and Critical Severity Issues
+        id: snyk-check
+        run: |
+          medium_issues=$(jq '[.[] | select(.vulnerabilities != null) | .vulnerabilities[] | select(.severity == "medium")] | length' snyk_report.json)
+          high_issues=$(jq '[.[] | select(.vulnerabilities != null) | .vulnerabilities[] | select(.severity == "high")] | length' snyk_report.json)
+          critical_issues=$(jq '[.[] | select(.vulnerabilities != null) | .vulnerabilities[] | select(.severity == "critical")] | length' snyk_report.json)
 
+          echo "Medium issues: $medium_issues"
+          echo "High issues: $high_issues"
+          echo "Critical issues: $critical_issues"
+
+          if [ "$critical_issues" -gt 0 ]; then
+            echo "Job failed: Found $critical_issues critical severity issues."
+            exit 1
+          else
+            echo "No critical severity issues found."
+            echo "Medium issues: $medium_issues"
+            echo "High issues: $high_issues"
+            echo "Job passed despite $((medium_issues + high_issues)) medium and high severity issues."
+          fi
+        shell: bash
+
+      - name: Upload Snyk Report
+        uses: actions/upload-artifact@v3
+        with:
+            name: snyk-report
+            path: snyk_report.json
+
+      - name: Scan Docker Image
+        run: |
+          snyk container test myapp:latest --severity-threshold=low --json --file=Dockerfile --project-name=SkillsViz > snyk_scan_results.json
+          cat snyk_scan_results.json  # Display the scan results in the console
+          
+      - name: Upload Snyk Scan Results as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: snyk-scan-results
+          path: snyk_scan_results.json
+
+      - name: Monitor Snyk Docker Project
+        run: |
+          snyk monitor --docker myapp:latest --project-name=SkillsViz
