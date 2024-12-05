@@ -115,7 +115,7 @@ jobs:
       - name: Upload Snyk Scan Results as Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: snyk-scan-results
+          name: Docker-results
           path: snyk_scan_results.json
 
       - name: Monitor Snyk Docker Project
