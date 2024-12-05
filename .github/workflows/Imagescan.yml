@@ -1,0 +1,36 @@
+name: Docker Build and Scan
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker-build-scan:
+    name: Docker Build and Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Build the Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t myapp:latest .
+        env:
+          DOCKER_BUILDKIT: 1
+
+      # Install Trivy
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -qO- https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz | tar xvz
+          sudo mv trivy /usr/local/bin/
+
+      # Scan Docker Image with Trivy
+      - name: Scan Docker Image
+        run: |
+          trivy image --severity HIGH,CRITICAL myapp:latest
+        continue-on-error: false
