@@ -121,3 +121,25 @@ jobs:
       - name: Monitor Snyk Docker Project
         run: |
           snyk monitor --docker myapp:latest --project-name=SkillsViz
+          
+      - name: ZAP Dynamic Analysis Scan
+        uses: zaproxy/action-full-scan@v0.12.0
+        with:
+          target: 'http://www.itsecgames.com/'
+          rules_file_name: '.github/workflows/rules.zap'
+          cmd_options: '-J zap_report.json'
+
+      - name: Debug ZAP JSON Output
+        run: |
+          echo "ZAP JSON Report:"
+          cat zap_report.json
+          echo "Formatted ZAP JSON Output:"
+          jq '.' zap_report.json
+        shell: bash
+
+      - name: Upload ZAP Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: zap-reports
+          path: |
+            zap_report.json
