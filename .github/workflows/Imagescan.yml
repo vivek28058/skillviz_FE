@@ -40,7 +40,4 @@ jobs:
       # Scan Docker Image with Snyk
       - name: Scan Docker Image
         run: |
-          snyk container test myapp:latest --severity-threshold=high
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        continue-on-error: false
+          snyk container test myapp:latest --severity-threshold=high --json --file=Dockerfile --project-name=SkillsViz | snyk monitor
