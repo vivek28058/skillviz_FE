@@ -76,14 +76,20 @@ jobs:
       - name: Check for Medium, High, and Critical Severity Issues
         id: snyk-check
         run: |
-          medium_issues=$(jq '[.[] | select(.vulnerabilities != null) | .vulnerabilities[] | select(.severity == "medium")] | length' snyk_report.json)
-          high_issues=$(jq '[.[] | select(.vulnerabilities != null) | .vulnerabilities[] | select(.severity == "high")] | length' snyk_report.json)
-          critical_issues=$(jq '[.[] | select(.vulnerabilities != null) | .vulnerabilities[] | select(.severity == "critical")] | length' snyk_report.json)
+          # Output the structure of the JSON report to debug
+          cat snyk_report.json
 
+          # Check medium, high, and critical issues
+          medium_issues=$(jq '[.vulnerabilities[] | select(.severity == "medium")] | length' snyk_report.json)
+          high_issues=$(jq '[.vulnerabilities[] | select(.severity == "high")] | length' snyk_report.json)
+          critical_issues=$(jq '[.vulnerabilities[] | select(.severity == "critical")] | length' snyk_report.json)
+
+          # Display results
           echo "Medium issues: $medium_issues"
           echo "High issues: $high_issues"
           echo "Critical issues: $critical_issues"
 
+          # Fail job if critical issues exist
           if [ "$critical_issues" -gt 0 ]; then
             echo "Job failed: Found $critical_issues critical severity issues."
             exit 1
