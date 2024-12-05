@@ -10,18 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Build the Docker image
       - name: Build Docker Image
         run: |
           docker build -t myapp:latest .
         env:
           DOCKER_BUILDKIT: 1
 
-      # Install Snyk CLI
       - name: Install Snyk
         run: |
           sudo apt-get update
@@ -30,27 +27,23 @@ jobs:
           sudo chmod +x /usr/local/bin/snyk
           snyk --version
 
-      # Authenticate Snyk
       - name: Authenticate Snyk
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           snyk auth $SNYK_TOKEN
 
-      # Scan Docker Image with Snyk and output results to JSON
       - name: Scan Docker Image
         run: |
           snyk container test myapp:latest --severity-threshold=low --json --file=Dockerfile --project-name=SkillsViz > snyk_scan_results.json
           cat snyk_scan_results.json  # Display the scan results in the console
 
-      # Upload the JSON results as an artifact
       - name: Upload Snyk Scan Results as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: snyk-scan-results
           path: snyk_scan_results.json
 
-      # Optionally, monitor the project in Snyk Dashboard
-      - name: Monitor Snyk Project
+      - name: Monitor Snyk Docker Project
         run: |
-          snyk monitor --file=Dockerfile --project-name=SkillsViz
+          snyk monitor --docker myapp:latest --project-name=SkillsViz
