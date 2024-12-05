@@ -40,4 +40,4 @@ jobs:
       # Scan Docker Image with Snyk
       - name: Scan Docker Image
         run: |
-          snyk container test myapp:latest --severity-threshold=high --json --file=Dockerfile --project-name=SkillsViz | snyk monitor
+          snyk container test myapp:latest --severity-threshold=low --json --file=Dockerfile --project-name=SkillsViz | snyk monitor
