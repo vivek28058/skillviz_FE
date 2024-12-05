@@ -21,21 +21,26 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
 
-      # Install Trivy
-      - name: Install Trivy
+      # Install Snyk CLI
+      - name: Install Snyk
         run: |
           sudo apt-get update
           sudo apt-get install -y wget
-          # Define Trivy version for stability
-          TRIVY_VERSION=$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep 'tag_name' | cut -d\" -f4)
-          wget -qO trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/${TRIVY_VERSION}/trivy_$(uname -s)_$(uname -m).tar.gz
-          tar -xvzf trivy.tar.gz
-          sudo mv trivy /usr/local/bin/
-          trivy --version
+          wget -qO- https://static.snyk.io/cli/latest/snyk-linux | sudo tee /usr/local/bin/snyk > /dev/null
+          sudo chmod +x /usr/local/bin/snyk
+          snyk --version
 
+      # Authenticate Snyk
+      - name: Authenticate Snyk
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk auth $SNYK_TOKEN
 
-      # Scan Docker Image with Trivy
+      # Scan Docker Image with Snyk
       - name: Scan Docker Image
         run: |
-          trivy image --severity HIGH,CRITICAL myapp:latest
+          snyk container test myapp:latest --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: false
