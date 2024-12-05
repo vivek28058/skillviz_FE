@@ -37,7 +37,20 @@ jobs:
         run: |
           snyk auth $SNYK_TOKEN
 
-      # Scan Docker Image with Snyk
+      # Scan Docker Image with Snyk and output results to JSON
       - name: Scan Docker Image
         run: |
-          snyk container test myapp:latest --severity-threshold=low --json --file=Dockerfile --project-name=SkillsViz | snyk monitor
+          snyk container test myapp:latest --severity-threshold=low --json --file=Dockerfile --project-name=SkillsViz > snyk_scan_results.json
+          cat snyk_scan_results.json  # Display the scan results in the console
+
+      # Upload the JSON results as an artifact
+      - name: Upload Snyk Scan Results as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: snyk-scan-results
+          path: snyk_scan_results.json
+
+      # Optionally, monitor the project in Snyk Dashboard
+      - name: Monitor Snyk Project
+        run: |
+          snyk monitor --file=Dockerfile --project-name=SkillsViz
