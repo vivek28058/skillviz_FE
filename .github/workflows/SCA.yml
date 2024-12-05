@@ -1,4 +1,4 @@
-name: Sonar, Snyk, and ZAP Scan
+name: Security Scans Integration
 on:
   push:
     branches:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   sonarcloud:
-    name: SonarQube Cloud
+    name: Security Scans
     runs-on: ubuntu-latest
     permissions:
       issues: write
