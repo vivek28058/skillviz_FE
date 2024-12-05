@@ -37,8 +37,4 @@ jobs:
         run: snyk monitor --all-projects
         continue-on-error: true
 
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.11.0
-        with:
-         target: 'https://www.vulnhub.com/entry/damn-vulnerable-web-application-dvwa-107,43/'
 
