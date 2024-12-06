@@ -149,4 +149,4 @@ jobs:
         uses: guardsquare/appsweep-action@main
         with:
           appsweep_api_key: ${{ secrets.APPSWEEP_API_KEY }}
-          input_file: Test.apk
+          input_file: Demo.apk
