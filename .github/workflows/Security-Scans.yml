@@ -16,6 +16,24 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Or your project’s Node version
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run Jest tests with coverage
+        run: |
+          npm test -- --coverage
+
+      - name: Upload Jest coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: SonarQube Cloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
