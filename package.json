@@ -12,7 +12,8 @@
     "format:check": "prettier . --check",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "jest --coverage"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.2.0",
@@ -52,6 +53,7 @@
     "prettier-plugin-tailwindcss": "^0.5.14",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5",
-    "vite": "^5.2.9"
+    "vite": "^5.2.9",
+    "jest": "^29.0.0"
   }
 }
