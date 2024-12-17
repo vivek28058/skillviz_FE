@@ -1,0 +1,36 @@
+name: Postman API Tests
+
+on:
+  workflow_run:
+    workflows:
+      - main  # Name of the workflow it depends on
+    types:
+      - completed
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Newman
+      run: npm install -g newman
+
+    - name: Run Postman Tests
+      run: |
+        newman run postman/CoffeeHouse.json \
+          --reporters cli,json \
+          --reporter-json-export postman-report.json
+
+    - name: Upload Postman Test Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: postman-report
+        path: postman-report.json
