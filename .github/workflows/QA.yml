@@ -3,7 +3,7 @@ name: Postman API Tests
 on:
   workflow_run:
     workflows:
-      - main  # Name of the workflow it depends on
+      - Security-Scans  # Name of the workflow it depends on
     types:
       - completed
 
