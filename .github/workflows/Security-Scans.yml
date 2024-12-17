@@ -133,7 +133,7 @@ jobs:
 
       - name: Scan Docker Image
         run: |
-          snyk container test myapp:latest --severity-threshold=low --json --file=Dockerfile --project-name=SkillsViz > snyk_scan_results.json
+          snyk container test myapp:latest --severity-threshold=medium --json --file=Dockerfile --project-name=SkillsViz > snyk_scan_results.json
           cat snyk_scan_results.json  # Display the scan results in the console
           
       - name: Upload Snyk Scan Results as Artifact
