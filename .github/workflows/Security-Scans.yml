@@ -12,7 +12,7 @@ jobs:
       issues: write
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
@@ -30,12 +30,12 @@ jobs:
           npm test -- --coverage
 
       - name: Upload Jest coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload Jest Coverage Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/lcov-report/index.html
@@ -60,7 +60,7 @@ jobs:
       #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Upload SonarQube Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
            name: sonar-report
            path: sonar_report.json
@@ -126,7 +126,7 @@ jobs:
         shell: bash
 
       - name: Upload Snyk Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
             name: snyk-report
             path: snyk_report.json
@@ -137,7 +137,7 @@ jobs:
           cat snyk_scan_results.json  # Display the scan results in the console
           
       - name: Upload Snyk Scan Results as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Docker-results
           path: snyk_scan_results.json
@@ -162,7 +162,7 @@ jobs:
         shell: bash
 
       - name: Upload ZAP Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zap-reports
           path: |
