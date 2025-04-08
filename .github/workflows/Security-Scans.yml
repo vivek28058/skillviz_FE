@@ -156,7 +156,7 @@ jobs:
         with:
           target: 'http://www.itsecgames.com/'
           rules_file_name: '.github/workflows/rules.zap'
-          cmd_options: '-J zap_report.json'
+          cmd_options: '-J zap_report.json -o zap_report.html'
 
       - name: Debug ZAP JSON Output
         run: |
@@ -172,6 +172,7 @@ jobs:
           name: zap-reports
           path: |
             zap_report.json
+            zap_report.html
 
       - name: Run AppSweep Scan
         id: appsweep-scan
