@@ -156,12 +156,8 @@ jobs:
         with:
           target: 'http://www.itsecgames.com/'
           rules_file_name: '.github/workflows/rules.zap'
-          cmd_options: >
-              -J zap_report.json
-              -r zap_report.html
-              --fail-on-warn false
-          # cmd_options: '-J zap_report.json -w report_md.md -r report_html.html'
-          # fail_action: true
+          cmd_options: '-J zap_report.json -w report_md.md -r report_html.html'
+
 
       # - name: Debug ZAP JSON Output
       #   run: |
