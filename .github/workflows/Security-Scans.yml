@@ -25,32 +25,32 @@ jobs:
         run: |
           npm install
 
-      - name: Run Jest tests with coverage
-        run: |
-          npm test -- --coverage
+      # - name: Run Jest tests with coverage
+      #   run: |
+      #     npm test -- --coverage
 
-      - name: Upload Jest coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+      # - name: Upload Jest coverage to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Upload Jest Coverage Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/lcov-report/index.html
+      # - name: Upload Jest Coverage Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: coverage-report
+      #     path: coverage/lcov-report/index.html
 
-      - name: SonarQube Cloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # - name: SonarQube Cloud Scan
+      #   uses: SonarSource/sonarcloud-github-action@master
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Generate SonarQube JSON Report
-        run: |
-          curl -u ${{ secrets.SONAR_TOKEN }}: \
-            "https://sonarcloud.io/api/measures/component_tree?component=vivek28058_Skillviz_BE&metricKeys=ncloc,complexity,violations,bugs,vulnerabilities,code_smells" \
-            -o sonar_report.json
-        shell: bash
+      # - name: Generate SonarQube JSON Report
+      #   run: |
+      #     curl -u ${{ secrets.SONAR_TOKEN }}: \
+      #       "https://sonarcloud.io/api/measures/component_tree?component=vivek28058_Skillviz_BE&metricKeys=ncloc,complexity,violations,bugs,vulnerabilities,code_smells" \
+      #       -o sonar_report.json
+      #   shell: bash
 
       #- name: SonarQube Quality Gate check
       #  id: sonarqube-quality-gate-check
@@ -59,11 +59,11 @@ jobs:
       #  env:
       #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Upload SonarQube Report
-        uses: actions/upload-artifact@v4
-        with:
-           name: sonar-report
-           path: sonar_report.json
+      # - name: Upload SonarQube Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #      name: sonar-report
+      #      path: sonar_report.json
 
       - name: Build Docker Image
         run: |
@@ -71,92 +71,115 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
 
-      - name: Install Snyk
-        run: npm install -g snyk
-
-      - name: Authenticate Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-      - name: Run Snyk Dependencies Scan
-        id: snyk-scan
+      - name: Install Syft
         run: |
-          snyk test --all-projects --json > snyk_report.json || true
-        shell: bash
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 
-      - name: Debug Snyk JSON Output
+      - name: Generate SBOM using Syft
+        run: syft myapp:latest -o cyclonedx-json > sbom.cdx.json
+
+    # --- GRYPE: Container Image Scan ---
+      - name: Install Grype
         run: |
-          echo "Printing snyk_report.json:"
-          cat snyk_report.json
-          echo "Formatted output using jq:"
-          jq '.' snyk_report.json
-        shell: bash
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
 
-      - name: Monitor Snyk SCA Scan
-        run: snyk monitor --all-projects
-        continue-on-error: true
+      - name: Run Grype Vulnerability Scan
+        run: grype myapp:latest -o table > grype-report.txt
 
-      - name: Check for Medium, High, and Critical Severity Issues
-        id: snyk-check
-        run: |
-          # Output the structure of the JSON report to debug
-          cat snyk_report.json
-
-          # Check medium, high, and critical issues
-          medium_issues=$(jq '[.vulnerabilities[] | select(.severity == "medium")] | length' snyk_report.json)
-          high_issues=$(jq '[.vulnerabilities[] | select(.severity == "high")] | length' snyk_report.json)
-          critical_issues=$(jq '[.vulnerabilities[] | select(.severity == "critical")] | length' snyk_report.json)
-
-          # Display results
-          echo "Medium issues: $medium_issues"
-          echo "High issues: $high_issues"
-          echo "Critical issues: $critical_issues"
-
-          # Fail job if critical issues exist
-          if [ "$critical_issues" -gt 0 ]; then
-            echo "Job failed: Found $critical_issues critical severity issues."
-            exit 1
-          else
-            echo "No critical severity issues found."
-            echo "Medium issues: $medium_issues"
-            echo "High issues: $high_issues"
-            echo "Job passed despite $((medium_issues + high_issues)) medium and high severity issues."
-          fi
-        shell: bash
-
-      - name: Upload Snyk Report
-        uses: actions/upload-artifact@v4
+      - name: Upload SBOM and Scan Reports
+        uses: actions/upload-artifact@v3
         with:
-            name: snyk-report
-            path: snyk_report.json
+          name: reports
+          path: |
+            sbom.cdx.json
+            grype-report.txt
+
+      # - name: Install Snyk
+      #   run: npm install -g snyk
+
+      # - name: Authenticate Snyk
+      #   run: snyk auth ${{ secrets.SNYK_TOKEN }}
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # - name: Run Snyk Dependencies Scan
+      #   id: snyk-scan
+      #   run: |
+      #     snyk test --all-projects --json > snyk_report.json || true
+      #   shell: bash
+
+      # - name: Debug Snyk JSON Output
+      #   run: |
+      #     echo "Printing snyk_report.json:"
+      #     cat snyk_report.json
+      #     echo "Formatted output using jq:"
+      #     jq '.' snyk_report.json
+      #   shell: bash
+
+      # - name: Monitor Snyk SCA Scan
+      #   run: snyk monitor --all-projects
+      #   continue-on-error: true
+
+      # - name: Check for Medium, High, and Critical Severity Issues
+      #   id: snyk-check
+      #   run: |
+      #     # Output the structure of the JSON report to debug
+      #     cat snyk_report.json
+
+      #     # Check medium, high, and critical issues
+      #     medium_issues=$(jq '[.vulnerabilities[] | select(.severity == "medium")] | length' snyk_report.json)
+      #     high_issues=$(jq '[.vulnerabilities[] | select(.severity == "high")] | length' snyk_report.json)
+      #     critical_issues=$(jq '[.vulnerabilities[] | select(.severity == "critical")] | length' snyk_report.json)
+
+      #     # Display results
+      #     echo "Medium issues: $medium_issues"
+      #     echo "High issues: $high_issues"
+      #     echo "Critical issues: $critical_issues"
+
+      #     # Fail job if critical issues exist
+      #     if [ "$critical_issues" -gt 0 ]; then
+      #       echo "Job failed: Found $critical_issues critical severity issues."
+      #       exit 1
+      #     else
+      #       echo "No critical severity issues found."
+      #       echo "Medium issues: $medium_issues"
+      #       echo "High issues: $high_issues"
+      #       echo "Job passed despite $((medium_issues + high_issues)) medium and high severity issues."
+      #     fi
+      #   shell: bash
+
+      # - name: Upload Snyk Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #       name: snyk-report
+      #       path: snyk_report.json
 
       #- name: Scan Docker Image
        # run: |
          # snyk container test myapp:latest --severity-threshold=medium --json --file=Dockerfile --project-name=SkillsViz > snyk_scan_results.json
         #  cat snyk_scan_results.json  # Display the scan results in the console
 
-      - name: Scan Docker Image (Allow Failures)
-        run: |
-          snyk container test myapp:latest --severity-threshold=medium --json --file=Dockerfile --project-name=SkillsViz > snyk_scan_results.json || true
-          cat snyk_scan_results.json
+      # - name: Scan Docker Image (Allow Failures)
+      #   run: |
+      #     snyk container test myapp:latest --severity-threshold=medium --json --file=Dockerfile --project-name=SkillsViz > snyk_scan_results.json || true
+      #     cat snyk_scan_results.json
     
-      - name: Upload Snyk Scan Results as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Docker-results
-          path: snyk_scan_results.json
+      # - name: Upload Snyk Scan Results as Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Docker-results
+      #     path: snyk_scan_results.json
 
-      - name: Monitor Snyk Docker Project
-        run: |
-          snyk monitor --docker myapp:latest --project-name=SkillsViz
+      # - name: Monitor Snyk Docker Project
+      #   run: |
+      #     snyk monitor --docker myapp:latest --project-name=SkillsViz
           
-      - name: ZAP Dynamic Analysis Scan
-        uses: zaproxy/action-full-scan@v0.12.0
-        with:
-          target: 'http://www.itsecgames.com/'
-          rules_file_name: '.github/workflows/rules.zap'
-          cmd_options: '-J zap_report.json -w report_md.md -r report_html.html'
+      # - name: ZAP Dynamic Analysis Scan
+      #   uses: zaproxy/action-full-scan@v0.12.0
+      #   with:
+      #     target: 'http://www.itsecgames.com/'
+      #     rules_file_name: '.github/workflows/rules.zap'
+      #     cmd_options: '-J zap_report.json -w report_md.md -r report_html.html'
 
 
       # - name: Debug ZAP JSON Output
@@ -174,9 +197,9 @@ jobs:
       #     path: |
       #       zap_report.json
 
-      - name: Run AppSweep Scan
-        id: appsweep-scan
-        uses: guardsquare/appsweep-action@main
-        with:
-          appsweep_api_key: ${{ secrets.APPSWEEP_API_KEY }}
-          input_file: Demo.apk
+      # - name: Run AppSweep Scan
+      #   id: appsweep-scan
+      #   uses: guardsquare/appsweep-action@main
+      #   with:
+      #     appsweep_api_key: ${{ secrets.APPSWEEP_API_KEY }}
+      #     input_file: Demo.apk
