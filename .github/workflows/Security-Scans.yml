@@ -84,7 +84,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Run Grype Vulnerability Scan
-        run: grype myapp:latest -o table > grype-report.txt
+        run: grype myapp:latest -o json > grype-report.json
 
       - name: Upload SBOM and Scan Reports
         uses: actions/upload-artifact@v4
@@ -92,7 +92,7 @@ jobs:
           name: reports
           path: |
             sbom.cdx.json
-            grype-report.txt
+            grype-report.json
 
       # - name: Install Snyk
       #   run: npm install -g snyk
