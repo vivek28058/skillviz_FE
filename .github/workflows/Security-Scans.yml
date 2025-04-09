@@ -76,7 +76,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Generate SBOM using Syft
-        run: syft myapp:latest -o cyclonedx-json > sbom.cdx.json
+        run: syft myapp:latest -o cyclonedx-json > sbom.json
 
     # --- GRYPE: Container Image Scan ---
       - name: Install Grype
@@ -91,7 +91,7 @@ jobs:
         with:
           name: reports
           path: |
-            sbom.cdx.json
+            sbom.json
             grype-report.json
 
       # - name: Install Snyk
