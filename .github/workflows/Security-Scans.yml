@@ -87,7 +87,7 @@ jobs:
         run: grype myapp:latest -o table > grype-report.txt
 
       - name: Upload SBOM and Scan Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: reports
           path: |
