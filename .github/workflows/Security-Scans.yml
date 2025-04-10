@@ -65,12 +65,8 @@ jobs:
       #      name: sonar-report
       #      path: sonar_report.json
 
-      - name: Install Syft
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin      
-
-      - name: Generate Pre-Build SBOM (Source Directory)
-        run: syft dir:. -o cyclonedx-json > sbom-pre.json
+      # - name: Generate Pre-Build SBOM (Source Directory)
+      #   run: syft dir:. -o cyclonedx-json > sbom-pre.json
       
       - name: Build Docker Image
         run: |
@@ -78,8 +74,12 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
 
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+      
       - name: Generate SBOM using Syft
-        run: syft myapp:latest -o cyclonedx-json > sbom.json
+        run: syft myapp:latest -o json > sbom.json
 
     # --- GRYPE: Container Image Scan ---
       - name: Install Grype
