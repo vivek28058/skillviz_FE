@@ -98,6 +98,20 @@ jobs:
             sbom.json
             grype-report.json
 
+      - name: Combine JSON reports
+        run: |
+          # Example input files
+          REPORT1="sbom.json"
+          REPORT2="grype-report.json"
+          OUTPUT="combined-report.json"
+
+      - name: Upload SBOM and Scan Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            combined-report.json
+
       # - name: Install Snyk
       #   run: npm install -g snyk
 
