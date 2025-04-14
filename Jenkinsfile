@@ -2,101 +2,52 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_BUILDKIT = '1'
+        IMAGE_NAME = "your-image-name:latest"
+        REPORT_DIR = "reports"
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Clone Repo') {
             steps {
-                // Checkout the repository
-                git url: 'https://github.com/vivek28058/skillviz_FE.git', branch: 'main'
-            }
-        }
-
-        stage('Set up Node.js') {
-            steps {
-                script {
-                    // Setting up Node.js environment
-                    sh 'curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -'
-                    sh 'sudo apt install -y nodejs'
-                }
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                script {
-                    // Install dependencies using npm
-                    sh 'npm install'
-                }
+                git 'https://github.com/vivek28058/skillviz_FE.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image
-                    sh 'docker build -t myapp:latest .'
+                    sh "docker build -t $IMAGE_NAME ."
                 }
             }
         }
 
-        stage('Install Syft') {
+        stage('Install Syft & Generate SBOM') {
             steps {
                 script {
-                    // Install Syft
-                    sh 'curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin'
+                    sh """
+                    curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+                    mkdir -p $REPORT_DIR
+                    syft $IMAGE_NAME -o json > $REPORT_DIR/sbom-syft.json
+                    """
                 }
             }
         }
 
-        stage('Generate SBOM with Syft') {
+        stage('Install Grype & Scan for Vulnerabilities') {
             steps {
                 script {
-                    // Generate SBOM (Software Bill of Materials)
-                    sh 'syft myapp:latest -o json > sbom.json'
+                    sh """
+                    curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+                    grype $IMAGE_NAME -o json > $REPORT_DIR/grype-report.json
+                    """
                 }
             }
         }
 
-        stage('Install Grype') {
+        stage('Archive Reports') {
             steps {
-                script {
-                    // Install Grype
-                    sh 'curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin'
-                }
+                archiveArtifacts artifacts: "$REPORT_DIR/*.json", allowEmptyArchive: true
             }
-        }
-
-        stage('Run Grype Vulnerability Scan') {
-            steps {
-                script {
-                    // Run Grype vulnerability scan
-                    sh 'grype myapp:latest -o json > grype-report.json'
-                }
-            }
-        }
-
-        stage('Combine SBOM and Grype Reports') {
-            steps {
-                script {
-                    // Combine SBOM and Grype reports into a single JSON report
-                    sh 'jq -s \'{sbom: .[0], grype: .[1]}\' sbom.json grype-report.json > combined-report.json'
-                }
-            }
-        }
-
-        stage('Upload Reports') {
-            steps {
-                // Archive the reports in Jenkins
-                archiveArtifacts artifacts: '**/*.json', allowEmptyArchive: true
-            }
-        }
-    }
-
-    post {
-        always {
-            echo 'Pipeline execution completed.'
         }
     }
 }
