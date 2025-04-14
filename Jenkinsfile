@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "vivek2426/777:latest"
+        IMAGE_NAME = credentials('Container-Image')
         REPORT_DIR = "reports"
         DOCKER_USERNAME = credentials('dockerhub-username')
         DOCKER_PASSWORD = credentials('dockerhub-password')
