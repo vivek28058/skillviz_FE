@@ -28,17 +28,17 @@ pipeline {
             }
         }
 
-        stage('Install Syft & Generate SBOM') {
-            steps {
-                script {
-                    // Install Syft (updated URL)
-                    bat 'curl -sSfL https://github.com/anchore/syft/releases/download/v0.46.0/syft_0.46.0_windows_x86_64.tar.gz -o syft.tar.gz'
-                    bat 'tar -xvzf syft.tar.gz'
-                    bat 'move syft.exe C:\\Windows\\System32\\syft.exe' // Ensure syft.exe is available in the PATH
-                    bat ".\\syft %IMAGE_NAME% -o json > %REPORT_DIR%\\sbom-syft.json"
-                }
-            }
+stage('Install Syft & Generate SBOM') {
+    steps {
+        script {
+            // Download Syft ZIP version
+            bat 'curl -sSfL https://github.com/anchore/syft/releases/download/v1.22.0/syft_1.22.0_windows_amd64.zip -o syft.zip'
+            bat 'powershell -Command "Expand-Archive -Path syft.zip -DestinationPath .\\syft"'
+            bat 'move .\\syft\\syft.exe C:\\Windows\\System32\\syft.exe' // Ensure syft.exe is available in the PATH
+            bat ".\\syft %IMAGE_NAME% -o json > %REPORT_DIR%\\sbom-syft.json"
         }
+    }
+}
 
         stage('Install Grype & Scan for Vulnerabilities') {
             steps {
