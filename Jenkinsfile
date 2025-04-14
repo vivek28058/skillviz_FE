@@ -19,6 +19,13 @@ pipeline {
             }
         }
 
+        stage('Check Git Checkout') {
+    steps {
+        bat 'echo Git Repo Path: %cd%'
+        bat 'git status'  // Check current status of Git repo
+    }
+}
+
         stage('Build Docker Image') {
             steps {
                 script {
