@@ -40,17 +40,17 @@ stage('Install Syft & Generate SBOM') {
     }
 }
 
-        stage('Install Grype & Scan for Vulnerabilities') {
-            steps {
-                script {
-                    // Install Grype
-                    bat 'curl -sSfL https://github.com/anchore/grype/releases/download/v0.40.0/grype_0.40.0_windows_x86_64.tar.gz -o grype.tar.gz'
-                    bat 'tar -xvzf grype.tar.gz'
-                    bat 'move grype.exe C:\\Windows\\System32\\grype.exe'
-                    bat ".\\grype %IMAGE_NAME% -o json > %REPORT_DIR%\\vuln-report-grype.json"
-                }
-            }
+stage('Install Grype & Scan for Vulnerabilities') {
+    steps {
+        script {
+            // Download Grype ZIP version
+            bat 'curl -sSfL https://github.com/anchore/grype/releases/download/v0.91.0/grype_0.91.0_windows_amd64.zip -o grype.zip'
+            bat 'powershell -Command "Expand-Archive -Path grype.zip -DestinationPath .\\grype"'
+            bat 'move .\\grype\\grype.exe C:\\Windows\\System32\\grype.exe' // Ensure grype.exe is available in the PATH
+            bat ".\\grype %IMAGE_NAME% -o json > %REPORT_DIR%\\vuln-report-grype.json"
         }
+    }
+}
 
         stage('Archive Reports') {
             steps {
