@@ -7,6 +7,12 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()  // This will clean the workspace
+            }
+        }
+
         stage('Clone Repo') {
             steps {
                 git 'https://github.com/vivek28058/skillviz_FE.git'
