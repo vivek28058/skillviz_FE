@@ -7,29 +7,17 @@ pipeline {
     }
 
     stages {
-        stage('Clean Workspace') {
+        stage('Checkout Code') {
             steps {
-                deleteDir()  // This will clean the workspace
+                // Cloning explicitly from main branch
+                git branch: 'main', url: 'https://github.com/vivek28058/skillviz_FE.git'
             }
         }
-
-        stage('Clone Repo') {
-            steps {
-                git 'https://github.com/vivek28058/skillviz_FE.git'
-            }
-        }
-
-        stage('Check Git Checkout') {
-    steps {
-        bat 'echo Git Repo Path: %cd%'
-        bat 'git status'  // Check current status of Git repo
-    }
-}
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    bat "docker build -t $IMAGE_NAME ."
+                    bat "docker build -t %IMAGE_NAME% ."
                 }
             }
         }
@@ -41,8 +29,8 @@ pipeline {
                     curl -sSfL https://github.com/anchore/syft/releases/download/v0.40.0/syft_0.40.0_windows_x86_64.tar.gz -o syft.tar.gz
                     tar -xvzf syft.tar.gz
                     move syft.exe C:\\Windows\\System32
-                    mkdir -p $REPORT_DIR
-                    syft $IMAGE_NAME -o json > $REPORT_DIR/sbom-syft.json
+                    if not exist %REPORT_DIR% mkdir %REPORT_DIR%
+                    syft %IMAGE_NAME% -o json > %REPORT_DIR%\\sbom-syft.json
                     """
                 }
             }
@@ -55,7 +43,7 @@ pipeline {
                     curl -sSfL https://github.com/anchore/grype/releases/download/v0.32.1/grype_0.32.1_windows_x86_64.tar.gz -o grype.tar.gz
                     tar -xvzf grype.tar.gz
                     move grype.exe C:\\Windows\\System32
-                    grype $IMAGE_NAME -o json > $REPORT_DIR/grype-report.json
+                    grype %IMAGE_NAME% -o json > %REPORT_DIR%\\grype-report.json
                     """
                 }
             }
@@ -63,7 +51,7 @@ pipeline {
 
         stage('Archive Reports') {
             steps {
-                archiveArtifacts artifacts: "$REPORT_DIR/*.json", allowEmptyArchive: true
+                archiveArtifacts artifacts: "${REPORT_DIR}/*.json", allowEmptyArchive: true
             }
         }
     }
