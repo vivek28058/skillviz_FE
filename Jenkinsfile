@@ -16,7 +16,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t $IMAGE_NAME ."
+                    bat "docker build -t $IMAGE_NAME ."
                 }
             }
         }
@@ -24,8 +24,10 @@ pipeline {
         stage('Install Syft & Generate SBOM') {
             steps {
                 script {
-                    sh """
-                    curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+                    bat """
+                    curl -sSfL https://github.com/anchore/syft/releases/download/v0.40.0/syft_0.40.0_windows_x86_64.tar.gz -o syft.tar.gz
+                    tar -xvzf syft.tar.gz
+                    move syft.exe C:\\Windows\\System32
                     mkdir -p $REPORT_DIR
                     syft $IMAGE_NAME -o json > $REPORT_DIR/sbom-syft.json
                     """
@@ -36,8 +38,10 @@ pipeline {
         stage('Install Grype & Scan for Vulnerabilities') {
             steps {
                 script {
-                    sh """
-                    curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+                    bat """
+                    curl -sSfL https://github.com/anchore/grype/releases/download/v0.32.1/grype_0.32.1_windows_x86_64.tar.gz -o grype.tar.gz
+                    tar -xvzf grype.tar.gz
+                    move grype.exe C:\\Windows\\System32
                     grype $IMAGE_NAME -o json > $REPORT_DIR/grype-report.json
                     """
                 }
