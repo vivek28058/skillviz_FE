@@ -31,11 +31,16 @@ pipeline {
 stage('Install Syft & Generate SBOM') {
     steps {
         script {
-            // Download Syft ZIP version
+            // Download and extract Syft
             bat 'curl -sSfL https://github.com/anchore/syft/releases/download/v1.22.0/syft_1.22.0_windows_amd64.zip -o syft.zip'
             bat 'powershell -Command "Expand-Archive -Path syft.zip -DestinationPath .\\syft"'
-            bat 'move .\\syft\\syft.exe C:\\Windows\\System32\\syft.exe' // Ensure syft.exe is available in the PATH
-            bat ".\\syft %IMAGE_NAME% -o json > %REPORT_DIR%\\sbom-syft.json"
+            bat 'move .\\syft\\syft.exe C:\\Windows\\System32\\syft.exe'
+
+            // Create reports directory if it doesn't exist
+            bat 'if not exist reports mkdir reports'
+
+            // Run Syft
+            bat 'syft %IMAGE_NAME% -o json > %REPORT_DIR%\\sbom-syft.json'
         }
     }
 }
