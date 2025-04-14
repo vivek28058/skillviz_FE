@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "vivek2426/skill:latest"
+        IMAGE_NAME = "vivek28058/skillviz:latest"
         REPORT_DIR = "reports"
     }
 
