@@ -5,7 +5,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "vivek28058/skillviz:latest"
+        IMAGE_NAME = "vivek2426/777:latest"
         REPORT_DIR = "reports"
         DOCKER_USERNAME = credentials('dockerhub-username') // Jenkins credentials ID
         DOCKER_PASSWORD = credentials('dockerhub-password') // Jenkins credentials ID
