@@ -2,22 +2,15 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "your-image-name:latest"
+        IMAGE_NAME = "vivek2426/skill:latest"
         REPORT_DIR = "reports"
     }
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                // Cloning explicitly from main branch
-                git branch: 'main', url: 'https://github.com/vivek28058/skillviz_FE.git'
-            }
-        }
-
-        stage('Build Docker Image') {
+        stage('Pull Image from Docker Hub') {
             steps {
                 script {
-                    bat "docker build -t %IMAGE_NAME% ."
+                    bat "docker pull %IMAGE_NAME%"
                 }
             }
         }
