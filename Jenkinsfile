@@ -30,21 +30,34 @@ pipeline {
 
         stage('Install Syft & Generate SBOM') {
             steps {
-                bat 'curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -'
-                bat ".\\syft %IMAGE_NAME% -o json > %REPORT_DIR%\\sbom.json"
+                script {
+                    bat """
+                    curl -sSfL https://github.com/anchore/syft/releases/download/v0.40.0/syft_0.40.0_windows_x86_64.tar.gz -o syft.tar.gz
+                    tar -xvzf syft.tar.gz
+                    move syft.exe C:\\Windows\\System32
+                    if not exist %REPORT_DIR% mkdir %REPORT_DIR%
+                    syft %IMAGE_NAME% -o json > %REPORT_DIR%\\sbom-syft.json
+                    """
+                }
             }
         }
 
         stage('Install Grype & Scan for Vulnerabilities') {
             steps {
-                bat 'curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -'
-                bat ".\\grype %IMAGE_NAME% -o json > %REPORT_DIR%\\vuln-report.json"
+                script {
+                    bat """
+                    curl -sSfL https://github.com/anchore/grype/releases/download/v0.32.1/grype_0.32.1_windows_x86_64.tar.gz -o grype.tar.gz
+                    tar -xvzf grype.tar.gz
+                    move grype.exe C:\\Windows\\System32
+                    grype %IMAGE_NAME% -o json > %REPORT_DIR%\\grype-report.json
+                    """
+                }
             }
         }
 
         stage('Archive Reports') {
             steps {
-                archiveArtifacts artifacts: "${REPORT_DIR}/*.json", fingerprint: true
+                archiveArtifacts artifacts: "${REPORT_DIR}/*.json", allowEmptyArchive: true
             }
         }
     }
