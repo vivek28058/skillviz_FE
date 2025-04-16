@@ -46,6 +46,7 @@ pipeline {
                     bat 'powershell -Command "Expand-Archive -Path grype.zip -DestinationPath .\\grype"'
                     bat 'move .\\grype\\grype.exe C:\\Windows\\System32\\grype.exe'
                     // FIX: Just call `grype` instead of `.\\grype`
+                    bat 'grype db update'
                     bat 'grype %IMAGE_NAME% -o json > %REPORT_DIR%\\vuln-report-grype.json'
                 }
             }
