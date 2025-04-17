@@ -89,17 +89,17 @@ jobs:
       - name: Run Grype Vulnerability Scan
         run: grype myapp:latest -o json > grype-report.json
 
-      - name: Combine JSON reports
-        run: |
-          jq -s '{sbom: .[0], grype: .[1]}' sbom.json grype-report.json > combined-report.json
+      # - name: Combine JSON reports
+      #   run: |
+      #     jq -s '{sbom: .[0], grype: .[1]}' sbom.json grype-report.json > combined-report.json
 
       - name: Upload SBOM and Scan Reports
         uses: actions/upload-artifact@v4
         with:
           name: reports
           path: |
-            sbom-pre.json
-            combined-report.json
+            sbom.json
+            grype-report.json
 
       # - name: Combine JSON reports
       #   run: |
