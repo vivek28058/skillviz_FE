@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Run Security Scan') {
             steps {
-                securityScan(DOCKER_USERNAME, DOCKER_PASSWORD, IMAGE_NAME, REPORT_DIR)
+                securityscan(DOCKER_USERNAME, DOCKER_PASSWORD, IMAGE_NAME, REPORT_DIR)
             }
         }
 
