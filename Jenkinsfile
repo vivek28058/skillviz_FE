@@ -6,7 +6,7 @@ pipeline {
     environment {
         REPORT_DIR = "reports"
     }
-
+    
     stages {
         stage('Run Security Scan') {
             environment {
