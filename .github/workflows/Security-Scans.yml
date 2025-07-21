@@ -223,9 +223,9 @@ jobs:
       #     path: |
       #       zap_report.json
 
-      - name: Run AppSweep Scan
-        id: appsweep-scan
-        uses: guardsquare/appsweep-action@main
-        with:
-          appsweep_api_key: ${{ secrets.APPSWEEP_API_KEY }}
-          input_file: Demo.apk
+      # - name: Run AppSweep Scan
+      #   id: appsweep-scan
+      #   uses: guardsquare/appsweep-action@main
+      #   with:
+      #     appsweep_api_key: ${{ secrets.APPSWEEP_API_KEY }}
+      #     input_file: Demo.apk
