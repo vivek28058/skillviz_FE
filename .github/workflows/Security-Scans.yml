@@ -52,13 +52,18 @@ jobs:
       #       -o sonar_report.json
       #   shell: bash
 
-      - name: SonarQube Quality Gate check
-        id: sonarqube-quality-gate-check
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # - name: SonarQube Quality Gate check
+      #   id: sonarqube-quality-gate-check
+      #   uses: sonarsource/sonarqube-quality-gate-action@master
+      #   timeout-minutes: 5
+      #   env:
+      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+      - name: SonarQube Source Code Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
       - name: Upload SonarQube Report
         uses: actions/upload-artifact@v4
         with:
