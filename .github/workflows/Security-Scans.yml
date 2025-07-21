@@ -25,45 +25,45 @@ jobs:
         run: |
           npm install
 
-      # - name: Run Jest tests with coverage
-      #   run: |
-      #     npm test -- --coverage
+      - name: Run Jest tests with coverage
+        run: |
+          npm test -- --coverage
 
-      # - name: Upload Jest coverage to Codecov
-      #   uses: codecov/codecov-action@v4
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload Jest coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
-      # - name: Upload Jest Coverage Report
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: coverage-report
-      #     path: coverage/lcov-report/index.html
+      - name: Upload Jest Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/lcov-report/index.html
 
-      # - name: SonarQube Cloud Scan
-      #   uses: SonarSource/sonarcloud-github-action@master
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # - name: Generate SonarQube JSON Report
-      #   run: |
-      #     curl -u ${{ secrets.SONAR_TOKEN }}: \
-      #       "https://sonarcloud.io/api/measures/component_tree?component=vivek28058_Skillviz_BE&metricKeys=ncloc,complexity,violations,bugs,vulnerabilities,code_smells" \
-      #       -o sonar_report.json
-      #   shell: bash
+      - name: Generate SonarQube JSON Report
+        run: |
+          curl -u ${{ secrets.SONAR_TOKEN }}: \
+            "https://sonarcloud.io/api/measures/component_tree?component=vivek28058_Skillviz_BE&metricKeys=ncloc,complexity,violations,bugs,vulnerabilities,code_smells" \
+            -o sonar_report.json
+        shell: bash
 
-      #- name: SonarQube Quality Gate check
-      #  id: sonarqube-quality-gate-check
-      #  uses: sonarsource/sonarqube-quality-gate-action@master
-      #  timeout-minutes: 5
-      #  env:
-      #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # - name: Upload SonarQube Report
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #      name: sonar-report
-      #      path: sonar_report.json
+      - name: Upload SonarQube Report
+        uses: actions/upload-artifact@v4
+        with:
+           name: sonar-report
+           path: sonar_report.json
 
       # - name: Generate Pre-Build SBOM (Source Directory)
       #   run: syft dir:. -o cyclonedx-json > sbom-pre.json
@@ -195,32 +195,32 @@ jobs:
       #   run: |
       #     snyk monitor --docker myapp:latest --project-name=SkillsViz
           
-      # - name: ZAP Dynamic Analysis Scan
-      #   uses: zaproxy/action-full-scan@v0.12.0
-      #   with:
-      #     target: 'http://www.itsecgames.com/'
-      #     rules_file_name: '.github/workflows/rules.zap'
-      #     cmd_options: '-J zap_report.json -w report_md.md -r report_html.html'
+      - name: ZAP Dynamic Analysis Scan
+        uses: zaproxy/action-full-scan@v0.12.0
+        with:
+          target: 'http://www.itsecgames.com/'
+          rules_file_name: '.github/workflows/rules.zap'
+          cmd_options: '-J zap_report.json -w report_md.md -r report_html.html'
 
 
-      # - name: Debug ZAP JSON Output
-      #   run: |
-      #     echo "ZAP JSON Report:"
-      #     cat zap_report.json
-      #     echo "Formatted ZAP JSON Output:"
-      #     jq '.' zap_report.json
-      #   shell: bash
+      - name: Debug ZAP JSON Output
+        run: |
+          echo "ZAP JSON Report:"
+          cat zap_report.json
+          echo "Formatted ZAP JSON Output:"
+          jq '.' zap_report.json
+        shell: bash
 
-      # - name: Upload ZAP Reports
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: zap-reports
-      #     path: |
-      #       zap_report.json
+      - name: Upload ZAP Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-reports
+          path: |
+            zap_report.json
 
-      # - name: Run AppSweep Scan
-      #   id: appsweep-scan
-      #   uses: guardsquare/appsweep-action@main
-      #   with:
-      #     appsweep_api_key: ${{ secrets.APPSWEEP_API_KEY }}
-      #     input_file: Demo.apk
+      - name: Run AppSweep Scan
+        id: appsweep-scan
+        uses: guardsquare/appsweep-action@main
+        with:
+          appsweep_api_key: ${{ secrets.APPSWEEP_API_KEY }}
+          input_file: Demo.apk
