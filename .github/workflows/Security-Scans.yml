@@ -40,17 +40,17 @@ jobs:
           name: coverage-report
           path: coverage/lcov-report/index.html
 
-      - name: SonarQube Cloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # - name: SonarQube Cloud Scan
+      #   uses: SonarSource/sonarcloud-github-action@master
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Generate SonarQube JSON Report
-        run: |
-          curl -u ${{ secrets.SONAR_TOKEN }}: \
-            "https://sonarcloud.io/api/measures/component_tree?component=vivek28058_Skillviz_BE&metricKeys=ncloc,complexity,violations,bugs,vulnerabilities,code_smells" \
-            -o sonar_report.json
-        shell: bash
+      # - name: Generate SonarQube JSON Report
+      #   run: |
+      #     curl -u ${{ secrets.SONAR_TOKEN }}: \
+      #       "https://sonarcloud.io/api/measures/component_tree?component=vivek28058_Skillviz_BE&metricKeys=ncloc,complexity,violations,bugs,vulnerabilities,code_smells" \
+      #       -o sonar_report.json
+      #   shell: bash
 
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
