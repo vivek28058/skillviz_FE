@@ -59,16 +59,16 @@ jobs:
       #   env:
       #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: SonarQube Source Code Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # - name: SonarQube Source Code Scan
+      #   uses: SonarSource/sonarcloud-github-action@master
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           
-      - name: Upload SonarQube Report
-        uses: actions/upload-artifact@v4
-        with:
-           name: sonar-report
-           path: sonar_report.json
+      # - name: Upload SonarQube Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #      name: sonar-report
+      #      path: sonar_report.json
 
       # - name: Generate Pre-Build SBOM (Source Directory)
       #   run: syft dir:. -o cyclonedx-json > sbom-pre.json
